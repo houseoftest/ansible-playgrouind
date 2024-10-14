@@ -1,4 +1,4 @@
-- name: Install Docker
+- name: Install Docker Community Edition
   package:
     name: docker-ce
     state: present
@@ -8,3 +8,28 @@
     name: docker
     state: started
     enabled: yes
+
+- name: Ensure docker group exists
+  group:
+    name: docker
+    state: present
+
+- name: Add user to docker group
+  user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: yes
+
+- name: Pull httpd Docker image
+  community.docker.docker_image:
+    name: httpd
+    source: pull
+  become: false
+
+- name: Run httpd Docker container
+  community.docker.docker_container:
+    name: httpd
+    image: httpd
+    state: started
+    ports:
+      - "80:80"
